@@ -1,0 +1,110 @@
+@gw = http://localhost:3000/api
+@sedeId = 11111111-1111-4111-8111-111111111111
+
+### 1. Registrar a Ana
+# @name ana
+POST {{gw}}/auth/register
+Content-Type: application/json
+
+{ "name": "Ana Ríos", "email": "ana-comunidad22@example.com" }
+
+### 2. Registrar a Luis
+# @name luis
+POST {{gw}}/auth/register
+Content-Type: application/json
+
+{ "name": "Luis Pardo", "email": "luis-comunidad22@example.com" }
+
+### 3. Crear un plan
+# @name plan
+POST {{gw}}/plans
+Content-Type: application/json
+Authorization: Bearer {{ana.response.body.accessToken}}
+
+{ "name": "Plan Comunidad 22", "price": 300000, "resourceAccess": ["DESK", "ROOM"] }
+
+### 4. Suscribir a Ana
+POST {{gw}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{ana.response.body.accessToken}}
+
+{ "memberId": "{{ana.response.body.member.id}}", "planId": "{{plan.response.body.id}}" }
+
+### 5. Luis, SIN membresía, intenta ver el directorio: 403
+GET {{gw}}/directory
+Authorization: Bearer {{luis.response.body.accessToken}}
+
+### 6. Ana crea su perfil
+PUT {{gw}}/directory/me
+Content-Type: application/json
+Authorization: Bearer {{ana.response.body.accessToken}}
+
+{ "displayName": "Ana Ríos", "profession": "Diseñadora UX", "bio": "Diseño productos digitales para startups." }
+
+### 7. Suscribir a Luis
+POST {{gw}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{luis.response.body.accessToken}}
+
+{ "memberId": "{{luis.response.body.member.id}}", "planId": "{{plan.response.body.id}}" }
+
+### 8. Luis crea su perfil
+PUT {{gw}}/directory/me
+Content-Type: application/json
+Authorization: Bearer {{luis.response.body.accessToken}}
+
+{ "displayName": "Luis Pardo", "profession": "Desarrollador backend", "bio": "Trabajo con microservicios y NestJS." }
+
+### 9. Ahora Luis sí ve el directorio
+GET {{gw}}/directory
+Authorization: Bearer {{luis.response.body.accessToken}}
+
+### 10. Buscar en el directorio
+GET {{gw}}/directory?search=diseñ
+Authorization: Bearer {{luis.response.body.accessToken}}
+
+### 11. Ana crea un evento de networking con 1 cupo
+# @name evento
+POST {{gw}}/events
+Content-Type: application/json
+Authorization: Bearer {{ana.response.body.accessToken}}
+
+{
+  "locationId": "{{sedeId}}",
+  "title": "Café de emprendedores",
+  "description": "Conversatorio sobre cómo conseguir los primeros clientes.",
+  "scheduledAt": "2026-12-05T23:00:00.000Z",
+  "capacity": 1
+}
+
+### 12. Ver los eventos SIN token (público)
+GET {{gw}}/events
+
+### 13. Luis se inscribe
+POST {{gw}}/events/{{evento.response.body.id}}/register
+Authorization: Bearer {{luis.response.body.accessToken}}
+
+### 14. Luis se inscribe otra vez: 409
+POST {{gw}}/events/{{evento.response.body.id}}/register
+Authorization: Bearer {{luis.response.body.accessToken}}
+
+### 15. Ana intenta inscribirse, pero no hay cupo: 409
+POST {{gw}}/events/{{evento.response.body.id}}/register
+Authorization: Bearer {{ana.response.body.accessToken}}
+
+### 16. Ana le escribe a Luis
+POST {{gw}}/messages
+Content-Type: application/json
+Authorization: Bearer {{ana.response.body.accessToken}}
+
+{ "recipientId": "{{luis.response.body.member.id}}", "body": "¡Hola Luis! Nos vemos en el café de emprendedores." }
+
+### 17. Bandeja de Luis
+GET {{gw}}/messages
+Authorization: Bearer {{luis.response.body.accessToken}}
+
+### 18. Sin token: 401
+GET {{gw}}/directory
+
+### Prueba directa a Community (sin Gateway)
+GET http://localhost:3006/events
