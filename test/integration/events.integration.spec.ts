@@ -60,4 +60,10 @@ describe('Eventos de la comunidad (integración con la base de datos)', () => {
   it('sin la identidad que pone el Gateway responde 401', async () => {
     await request(app.getHttpServer()).post(`/events/${eventId}/register`).expect(401);
   });
+
+  it('publica la documentación de la API (OpenAPI)', async () => {
+    const res = await request(app.getHttpServer()).get('/docs-json').expect(200);
+    expect(res.body.openapi).toBeDefined();
+    expect(Object.keys(res.body.paths).length).toBeGreaterThan(0);
+  });
 });

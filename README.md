@@ -7,3 +7,8 @@ Microservicio de comunidad: directorio de miembros, eventos de networking por se
 - **Endpoints:** `/directory`, `/directory/me`, `/events`, `/events/:id/register`, `/messages`, `/messages/:id/read`
 - **Puerto local:** 3006
 - **Identidad:** lee el encabezado `x-member-id` que agrega el API Gateway tras validar el JWT. Debe exponerse solo detrás del Gateway.
+
+## Documentación de la API
+
+- Swagger UI desplegado: https://coworkspace-community-latest.onrender.com/docs
+- En local: http://localhost:<PUERTO>/docs (el JSON OpenAPI está en `/docs-json`).
